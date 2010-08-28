@@ -91,14 +91,17 @@ var speed=500,
     blocks.push([[1, 1, 0],[0, 1, 1], [0,0,0]]); //Z-block
     
 //clearing the board
-for( var y = 0; y < yBoard; y++ ) {
-    
-    board[y] = [];
-    
-    for( var x = 0; x < xBoard; x++ ) {
-        board[y][x]='';
+var clearBoard = function() {
+    for( var y = 0; y < yBoard; y++ ) {
+        
+        board[y] = [];
+        
+        for( var x = 0; x < xBoard; x++ ) {
+            board[y][x]='';
+        }
     }
 }
+clearBoard();
 
 var showBlock = function(blockNumber) {
 //funkcja pokazujaca klocek o danym numerze
@@ -163,6 +166,7 @@ io.on('connection', function(client){
         setTimeout(arguments.callee, 1000);
     })();*/
 	client.on('disconnect', function(){
+        clearBoard();
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
 });
