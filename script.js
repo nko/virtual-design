@@ -37,7 +37,7 @@ for( var y = 0; y < yFields; y++ ) { //'draw' rows
 
 ///////////////////////////
 // creating socket stuff based on socket.io & socket.io-node
-io.setPath('/socketClient/');
+io.setPath('/socketIO/');
 
 var socket = new io.Socket(null, {port: 80});
       socket.connect();
