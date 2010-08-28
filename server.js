@@ -24,12 +24,32 @@ server = http.createServer(function(req, res){
 			break;
 			
 		default:
-			if (/\.(js|html|swf)$/.test(path)){
+			if (/\.(js|html|swf|css)$/.test(path)){
 				try {
-					var swf = path.substr(-4) === '.swf';
-					res.writeHead(200, {'Content-Type': swf ? 'application/x-shockwave-flash' : ('text/' + (path.substr(-3) === '.js' ? 'javascript' : 'html'))});
-					fs.readFile(__dirname + path, swf ? 'binary' : 'utf8', function(err, data){
-						if (!err) res.write(data, swf ? 'binary' : 'utf8');
+                    var contentType='',
+                        encoding='';
+                    switch (path.substr(path.lastIndexOf('.')-path.length)) {
+                        case '.swf': //here comes da FlashFileeeeee
+                            contentType = 'application/x-shockwave-flash'; 
+                            encoding='binary';
+                        break;
+                        case '.js':
+                            contentType = 'text/javascript';
+                            encoding='utf8';
+                        break;
+                        case '.html':
+                            contentType = 'text/html';
+                            encoding='utf8';
+                        break;
+                        case '.css':
+                            contentType = 'text/css';
+                            encoding='utf8';
+                        break;
+                    }
+
+					res.writeHead(200, {'Content-Type': contentType});
+					fs.readFile(__dirname + path, encoding, function(err, data){
+						if (!err) res.write(data, encoding);
 						res.end();
 					});
 				} catch(e){ 
