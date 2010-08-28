@@ -129,6 +129,57 @@ var showBlock = function(blockNumber) {
     }
 };
 
+var lowerBlock = function() {
+
+    var i=activeBlock.length,
+        movePossible = true;  //is it possible to move down?
+    
+    while (i--) {
+        var targetCoordsY = activeBlock[i][0]+1,
+            targetCoordsX = activeBlock[i][1]; //pole docelowe
+        if ((board[targetCoordsY][targetCoordsX]) && (board[targetCoordsY][targetCoordsX]=='')) {
+        
+        } else {
+            if (activeBlock.indexOf([[targetCoordsY],[targetCoordsX]]) != -1) { /////////////////////////////////////////TU SKONCZYLEM
+            } else {
+            moznaRuszyc = false;
+            aktywnyKlocek = [];
+            nrAK = -1;
+            break;
+            }
+        }
+        
+    }
+    
+    if (moznaRuszyc) {
+        i=aktywnyKlocek.length;
+        while (i--) {
+            var poleZr = document.getElementById(aktywnyKlocek[i]); //pole zrodlowe
+            
+            
+            var wspolrzedne = aktywnyKlocek[i].split("-"), // [0]-x ; [1]-y
+                docWsp = wspolrzedne[0]+"-"+(parseInt(wspolrzedne[1], 10)+1),
+                poleDoc = document.getElementById(docWsp); //pole docelowe
+            if ((poleDoc) && (!poleDoc.className)) {
+                //console.log(docWsp);
+                poleDoc.className=poleZr.className;
+                poleZr.className='';
+                aktywnyKlocek[i] = docWsp;
+            } else {
+                aktywnyKlocek = [];
+                nrAK = -1;
+                break;
+            }
+            
+        }
+    } else {
+        DodajPunkty(1);
+        SprawdzLinie();
+        PokazKlocek(nastepnyKlocek);
+    }
+};
+
+
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board };
