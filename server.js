@@ -129,7 +129,7 @@ var showBlock = function(blockNumber) {
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board };
-    
+    showBlock(~~(Math.random()*blocks.length));
 	client.on('message', function(message){
         var comm=''
         if (message==38 || message==119) {//up
@@ -150,13 +150,13 @@ io.on('connection', function(client){
 		
 	});
     
-    (function(){
+    /*(function(){
     //Main game loop
-        showBlock(~~(Math.random()*blocks.length));
+        
         client.send(message);
         client.broadcast(message);
         setTimeout(arguments.callee, 1000);
-    })();
+    })();*/
 	client.on('disconnect', function(){
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
