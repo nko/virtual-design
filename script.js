@@ -1,3 +1,3 @@
 (function(){
- document.getElementByIt('test').innerHTML = 'IT WORKS!';
+ document.getElementById('test').innerHtml = 'IT WORKS!';
  })();
