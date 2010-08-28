@@ -15,6 +15,7 @@
 var xFields = 40, //width
     yFields = 20, //height
     fieldSize = 20,
+    fields =[],
     container = document.getElementById('container'),
     //construction Vars
     table = document.createElement('table'),
@@ -25,16 +26,26 @@ table.appendChild(tbody);
 
 for( var y = 0; y < yFields; y++ ) { //'draw' rows
     var row = document.createElement('tr');
+    fields[y] = [];
     tbody.appendChild(row);
     for( var x = 0; x < xFields; x++ ) { //and cols
         var field = document.createElement('td');
         field.width = fieldSize;
         field.height = fieldSize;
         field.id = x+"_"+y;
+        fields[y][x] = field;
         row.appendChild(field);
     }
 }
 
+var redrawBoard = function(board) {
+    for( var y = 0; y < yFields; y++ ) { //'draw' rows
+        for( var x = 0; x < xFields; x++ ) { //and cols
+            
+            fields[y][x].className = board[y][x];
+        }
+    }
+}
 ///////////////////////////
 // creating socket stuff based on socket.io & socket.io-node
 io.setPath('/socketIO/');
@@ -43,20 +54,12 @@ var socket = new io.Socket(null, {port: 80});
       socket.connect();
       socket.on('message', function(obj){
 
-        if ('buffer' in obj) {
-          document.getElementById('debug').innerHTML += '<br/>connection server responces:';
-          for (var i in obj.buffer) document.getElementById('debug').innerHTML += '<br/>'+obj.buffer[i].message[1];
-          
-          //there are msgs in buffer so if you connect it has to be propagated
-          //for (var i in obj.buffer) message(obj.buffer[i]);  
-          
-        } else {
-            document.getElementById('debug').innerHTML += '<br/>'+obj.message[1];
-        }
+        redrawBoard(obj.board);
       });      
 
 
 //keys
+
 document.onkeypress = function (e){
         var evtobj=window.event? event : e,
             unicode=evtobj.charCode? evtobj.charCode : evtobj.keyCode;

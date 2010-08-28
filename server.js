@@ -68,25 +68,47 @@ server.listen(80);
 // socket.io, I choose you
 // simplest chat application evar
 var io = io.listen(server);
-        
+      
+
+/////////////////////////
+// GAME LOGIC
+
+var board=[],
+    xBoard = 40, //width
+    yBoard = 20, //height
+    blocks = []; 
+//blocks shapes
+    blocks.push([[1, 1, 1, 1], [0,0,0,0], [0,0,0,0], [0,0,0,0]]); // I-block
+    blocks.push([[1, 1, 1], [0, 1, 0], [0,0,0] ]); // T-block
+ 
+//clearing the board
+for( var y = 0; y < yBoard; y++ ) {
+    
+    board[y] = [];
+    
+    for( var x = 0; x < xBoard; x++ ) {
+        board[y][x]='';
+    }
+}
+
+
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
 
 	client.on('message', function(message){
         var comm=''
         if (message==38 || message==119) {
-            comm='UP';
+            board[4][5] = 'style1';
         } else if (message==37 || message==97) {
             comm='LEFT';
         } else if (message==39 || message==100) {
-            comm='RIGHT';
+            board[10][10] = 'style1';
         } else if (message==40 || message==115) {
             comm='DOWN';
         }
-		var message = { message: [client.sessionId, comm] };
+		var message = { board: board };
 		
-        if (comm!='') {
-            console.log(message);     
+        if (comm!='') {     
             client.send(message);
             client.broadcast(message);
         }
@@ -94,6 +116,6 @@ io.on('connection', function(client){
 	});
 
 	client.on('disconnect', function(){
-		client.broadcast({ announcement: client.sessionId + ' disconnected' });
+		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
 });
