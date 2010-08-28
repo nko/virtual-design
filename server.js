@@ -73,7 +73,11 @@ var io = io.listen(server);
 /////////////////////////
 // GAME LOGIC
 
-var board=[],
+var speed=500,
+    schema = [],
+    blockClass = 'style1',
+    activeBlock = [],
+    board=[],
     xBoard = 40, //width
     yBoard = 20, //height
     blocks = []; 
@@ -96,30 +100,63 @@ for( var y = 0; y < yBoard; y++ ) {
     }
 }
 
+var showBlock = function(blockNumber) {
+//funkcja pokazujaca klocek o danym numerze
+    var block = blocks[blockNumber],
+        wspX = board[0].indexOf(''), 
+        wspY = 0, i, z;
+    
+    if (wspX === -1) {
+        //stanGry=0;
+        //clearInterval(petlaGry);
+         
+        //GameOver
+     } else {
+        for ( i = 0; i < block.length; i++ ) {
+            for ( z=0; z<block[i].length; z++) {
+                if (block[i][z] == 1) {
+                    board[wspY+i][wspX+z] = blockClass;
+                    activeBlock.push([wspY+i, wspX+z]);
+                    
+                }
+                
+            }
+        }
+        schema = block;
+    }
+};
 
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
-
+    var message = { board: board };
+    
 	client.on('message', function(message){
         var comm=''
-        if (message==38 || message==119) {
-            //board[4][5] = 'style1';
-        } else if (message==37 || message==97) {
-            comm='LEFT';
-        } else if (message==39 || message==100) {
-            //board[10][10] = 'style1';
-        } else if (message==40 || message==115) {
-            comm='DOWN';
+        if (message==38 || message==119) {//up
+            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+        } else if (message==37 || message==97) { //left
+            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+        } else if (message==39 || message==100) { //right
+            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+        } else if (message==40 || message==115) { //down
+            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         }
+        
 		var message = { board: board };
 		
-          
             client.send(message);
             client.broadcast(message);
         
 		
 	});
-
+    
+    (function(){
+    //Main game loop
+        showBlock(~~(Math.random()*blocks.length));
+        client.send(message);
+        client.broadcast(message);
+        setTimeout(arguments.callee, 1000);
+    })();
 	client.on('disconnect', function(){
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
