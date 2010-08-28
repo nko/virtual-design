@@ -12,9 +12,9 @@
 
 
 // Main Variables
-var xFields = 10,
-    yFields = 20,
-    fieldSize = 15,
+var xFields = 20,
+    yFields = 40,
+    fieldSize = 20,
     container = document.getElementById('container'),
     //construction Vars
     table = document.createElement('table'),
@@ -28,8 +28,8 @@ for( var y = 0; y < yFields; y++ ) { //'draw' rows
     tbody.appendChild(row);
     for( var x = 0; x < xFields; x++ ) { //and cols
         var field = document.createElement('td');
-        field.style.width = fieldSize;
-        field.style.height = fieldSize;
+        field.width = fieldSize;
+        field.height = fieldSize;
         field.id = x+"_"+y;
         row.appendChild(field);
     }
