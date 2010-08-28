@@ -9,10 +9,23 @@
                 border-collapse: collapse;
                 visibility:visible;
             }
+            .debug {
+                border: 1px solid black;
+                font-size:17px;
+                color: #999;
+                width: 200px;
+                height: 200px;
+                overflow:auto;
+                float:right;
+            }
         </style>
+        <script src="/socketClient/json.js"></script> <!-- for ie -->
+        <script src="/socketClient/socket.io.js"></script>
     </head>
     <body>
+        <div id='debug' class='debug'></div>
         <div id="container"></div>
+        
         <script src="script.js"></script>
     </body>
 </html>

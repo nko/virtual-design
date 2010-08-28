@@ -34,3 +34,32 @@ for( var y = 0; y < yFields; y++ ) { //'draw' rows
         row.appendChild(field);
     }
 }
+
+///////////////////////////
+// creating socket stuff based on socket.io & socket.io-node
+io.setPath('/socketClient/');
+
+var socket = new io.Socket(null, {port: 80});
+      socket.connect();
+      socket.on('message', function(obj){
+        console.log(obj);
+        if ('buffer' in obj) {
+          document.getElementById('debug').innerHTML += '<br/>connection server responces:';
+          for (var i in obj.buffer) document.getElementById('debug').innerHTML += '<br/>'+obj.buffer[i].message[1];
+          
+          //there are msgs in buffer so if you connect it has to be propagated
+          //for (var i in obj.buffer) message(obj.buffer[i]);  
+          
+        } else {
+            document.getElementById('debug').innerHTML += '<br/>'+obj.message[1];
+        }
+      });      
+
+
+//keys
+document.onkeypress = function (e){
+        var evtobj=window.event? event : e,
+            unicode=evtobj.charCode? evtobj.charCode : evtobj.keyCode;
+    socket.send(unicode);
+}
+        

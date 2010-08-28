@@ -47,18 +47,30 @@ server.listen(80);
 		
 // socket.io, I choose you
 // simplest chat application evar
-var io = io.listen(server),
-		buffer = [];
-		
+var io = io.listen(server);
+        
 io.on('connection', function(client){
-	client.send({ buffer: buffer });
-	client.broadcast({ announcement: client.sessionId + ' connected' });
+	//client.broadcast({ announcement: client.sessionId + ' connected' });
 
 	client.on('message', function(message){
-		var msg = { message: [client.sessionId, message] };
-		buffer.push(msg);
-		if (buffer.length > 15) buffer.shift();
-		client.broadcast(msg);
+        var comm=''
+        if (message==38 || message==119) {
+            comm='UP';
+        } else if (message==37 || message==97) {
+            comm='LEFT';
+        } else if (message==39 || message==100) {
+            comm='RIGHT';
+        } else if (message==40 || message==115) {
+            comm='DOWN';
+        }
+		var message = { message: [client.sessionId, comm] };
+		
+        if (comm!='') {
+            console.log(message);     
+            client.send(message);
+            client.broadcast(message);
+        }
+		
 	});
 
 	client.on('disconnect', function(){
