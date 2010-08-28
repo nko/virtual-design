@@ -73,6 +73,8 @@ var io = io.listen(server);
 /////////////////////////
 // GAME LOGIC
 
+function areArraysEqual(c,d){var b=[];if(!c[0]||!d[0])return false;if(c.length!=d.length)return false;for(var a=0;a<c.length;a++){key=typeof c[a]+"~"+c[a];if(b[key])b[key]++;else b[key]=1}for(a=0;a<d.length;a++){key=typeof d[a]+"~"+d[a];if(b[key])if(b[key]==0)return false;else b[key]--;else return false}return true};
+
 var speed=500,
     schema = [],
     blockClass = 'style1',
@@ -126,56 +128,63 @@ var showBlock = function(blockNumber) {
             }
         }
         schema = block;
+        console.log(activeBlock);
     }
 };
 
 var lowerBlock = function() {
 
     var i=activeBlock.length,
+        insideActive = false,
         movePossible = true;  //is it possible to move down?
-    
+    /*
     while (i--) {
+
         var targetCoordsY = activeBlock[i][0]+1,
             targetCoordsX = activeBlock[i][1]; //pole docelowe
         if ((board[targetCoordsY][targetCoordsX]) && (board[targetCoordsY][targetCoordsX]=='')) {
-        
+            
         } else {
-            if (activeBlock.indexOf([[targetCoordsY],[targetCoordsX]]) != -1) { /////////////////////////////////////////TU SKONCZYLEM
-            } else {
-            moznaRuszyc = false;
-            aktywnyKlocek = [];
-            nrAK = -1;
-            break;
+            for (var w=0, aB=activeBlock.length;w<aB;w++) {
+                console.log(areArraysEqual(activeBlock[w], [[targetCoordsY],[targetCoordsX]]));
+                console.log('abw '+activeBlock[w]+' is equal to '+[[targetCoordsY],[targetCoordsX]]);
+                
+                if (areArraysEqual(activeBlock[w], [[targetCoordsY],[targetCoordsX]])) {
+                    insideActive = true;
+                } 
             }
+            if (!insideActive) {
+                movePossible = false;
+                activeBlock=[];
+                break;
+            }  
         }
         
     }
-    
-    if (moznaRuszyc) {
-        i=aktywnyKlocek.length;
+    */
+    if (movePossible) {
+        i=activeBlock.length;
         while (i--) {
-            var poleZr = document.getElementById(aktywnyKlocek[i]); //pole zrodlowe
+            var targetCoordsY = activeBlock[i][0]+1,
+                targetCoordsX = activeBlock[i][1]; 
             
-            
-            var wspolrzedne = aktywnyKlocek[i].split("-"), // [0]-x ; [1]-y
-                docWsp = wspolrzedne[0]+"-"+(parseInt(wspolrzedne[1], 10)+1),
-                poleDoc = document.getElementById(docWsp); //pole docelowe
-            if ((poleDoc) && (!poleDoc.className)) {
+           //if ((board[targetCoordsY][targetCoordsX]) && (board[targetCoordsY][targetCoordsX]=='')) {
                 //console.log(docWsp);
-                poleDoc.className=poleZr.className;
-                poleZr.className='';
-                aktywnyKlocek[i] = docWsp;
-            } else {
-                aktywnyKlocek = [];
-                nrAK = -1;
-                break;
-            }
+                console.log(activeBlock);
+                board[targetCoordsY][targetCoordsX] = board[activeBlock[i][0]][targetCoordsX];
+                board[activeBlock[i][0]][targetCoordsX]='';
+                activeBlock[i] = [[targetCoordsY], [targetCoordsX]];
+            //} else {
+            //    activeBlock = [];
+            //    break;
+            //}
             
         }
     } else {
-        DodajPunkty(1);
-        SprawdzLinie();
-        PokazKlocek(nastepnyKlocek);
+        console.log('show next');
+        //DodajPunkty(1);
+        //SprawdzLinie();
+        //PokazKlocek(nastepnyKlocek);
     }
 };
 
@@ -196,8 +205,9 @@ io.on('connection', function(client){
         } else if (message==37 || message==97) { //left
             //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         } else if (message==39 || message==100) { //right
-            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            board[~~(Math.random()*yBoard)][0] = 'style2';
         } else if (message==40 || message==115) { //down
+            lowerBlock();
             //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         }
         
