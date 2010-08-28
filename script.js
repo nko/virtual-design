@@ -12,8 +12,8 @@
 
 
 // Main Variables
-var xFields = 20,
-    yFields = 40,
+var xFields = 40, //width
+    yFields = 20, //height
     fieldSize = 20,
     container = document.getElementById('container'),
     //construction Vars
