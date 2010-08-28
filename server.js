@@ -16,11 +16,12 @@ server = http.createServer(function(req, res){
 	switch (path){
 		case '/':
 				res.writeHead(200, {'Content-Type': 'text/html'});
-				fs.readFile(__dirname + '/index.html', 'utf8', function(err, data){
+				res.write('developing');
+                /*fs.readFile(__dirname + '/index.html', 'utf8', function(err, data){
 				if (!err) res.write(data, 'utf8');
 						res.end();
 				});
-
+*/
 			break;
 			
 		default:
@@ -128,7 +129,6 @@ var showBlock = function(blockNumber) {
             }
         }
         schema = block;
-        console.log(activeBlock);
     }
 };
 
@@ -137,19 +137,16 @@ var lowerBlock = function() {
     var i=activeBlock.length,
         insideActive = false,
         movePossible = true;  //is it possible to move down?
-    /*
+    
     while (i--) {
 
         var targetCoordsY = activeBlock[i][0]+1,
             targetCoordsX = activeBlock[i][1]; //pole docelowe
-        if ((board[targetCoordsY][targetCoordsX]) && (board[targetCoordsY][targetCoordsX]=='')) {
+        if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]=='')) {
             
         } else {
-            for (var w=0, aB=activeBlock.length;w<aB;w++) {
-                console.log(areArraysEqual(activeBlock[w], [[targetCoordsY],[targetCoordsX]]));
-                console.log('abw '+activeBlock[w]+' is equal to '+[[targetCoordsY],[targetCoordsX]]);
-                
-                if (areArraysEqual(activeBlock[w], [[targetCoordsY],[targetCoordsX]])) {
+            for (var w=0, aB=activeBlock.length;w<aB;w++) {             
+                if (areArraysEqual(activeBlock[w], [targetCoordsY,targetCoordsX])) {
                     insideActive = true;
                 } 
             }
@@ -161,27 +158,27 @@ var lowerBlock = function() {
         }
         
     }
-    */
+    
     if (movePossible) {
         i=activeBlock.length;
         while (i--) {
             var targetCoordsY = activeBlock[i][0]+1,
                 targetCoordsX = activeBlock[i][1]; 
             
-           //if ((board[targetCoordsY][targetCoordsX]) && (board[targetCoordsY][targetCoordsX]=='')) {
+           if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]=='')) {
                 //console.log(docWsp);
-                console.log(activeBlock);
                 board[targetCoordsY][targetCoordsX] = board[activeBlock[i][0]][targetCoordsX];
                 board[activeBlock[i][0]][targetCoordsX]='';
-                activeBlock[i] = [[targetCoordsY], [targetCoordsX]];
-            //} else {
-            //    activeBlock = [];
-            //    break;
-            //}
+                activeBlock[i] = [targetCoordsY, targetCoordsX];
+            } else {
+                activeBlock = [];
+                break;
+            }
             
         }
     } else {
-        console.log('show next');
+        showBlock(1);
+        //console.log('show next');
         //DodajPunkty(1);
         //SprawdzLinie();
         //PokazKlocek(nastepnyKlocek);
@@ -192,8 +189,8 @@ var lowerBlock = function() {
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board };
-    showBlock(~~(Math.random()*blocks.length));
-    
+    //showBlock(~~(Math.random()*blocks.length));
+    showBlock(1);
     //delete that:
     client.send(message);
     client.broadcast(message);
