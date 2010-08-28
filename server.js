@@ -130,16 +130,21 @@ io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board };
     showBlock(~~(Math.random()*blocks.length));
+    
+    //delete that:
+    client.send(message);
+    client.broadcast(message);
+            
 	client.on('message', function(message){
         var comm=''
         if (message==38 || message==119) {//up
-            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         } else if (message==37 || message==97) { //left
-            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         } else if (message==39 || message==100) { //right
-            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         } else if (message==40 || message==115) { //down
-            board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
         }
         
 		var message = { board: board };
