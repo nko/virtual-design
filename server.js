@@ -15,7 +15,7 @@ server = http.createServer(function(req, res){
 	var path = url.parse(req.url).pathname;
 	switch (path){
 		case '/':
-				res.writeHead(200, {'Content-Type': 'html'});
+				res.writeHead(200, {'Content-Type': 'text/html'});
 				fs.readFile(__dirname + '/index.html', 'utf8', function(err, data){
 				if (!err) res.write(data, 'utf8');
 						res.end();
