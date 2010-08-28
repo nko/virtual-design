@@ -42,7 +42,7 @@ io.setPath('/socketIO/');
 var socket = new io.Socket(null, {port: 80});
       socket.connect();
       socket.on('message', function(obj){
-        console.log(obj);
+        //console.log(obj);
         if ('buffer' in obj) {
           document.getElementById('debug').innerHTML += '<br/>connection server responces:';
           for (var i in obj.buffer) document.getElementById('debug').innerHTML += '<br/>'+obj.buffer[i].message[1];
