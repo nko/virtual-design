@@ -28,7 +28,8 @@ for( var y = 0; y < yFields; y++ ) { //'draw' rows
     tbody.appendChild(row);
     for( var x = 0; x < xFields; x++ ) { //and cols
         var field = document.createElement('td');
-        field.style.width = field.style.height = fieldSize;
+        field.style.width = fieldSize;
+        field.style.height = fieldSize;
         field.id = x+"_"+y;
         row.appendChild(field);
     }
