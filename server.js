@@ -108,10 +108,10 @@ io.on('connection', function(client){
         }
 		var message = { board: board };
 		
-        if (comm!='') {     
+          
             client.send(message);
             client.broadcast(message);
-        }
+        
 		
 	});
 
