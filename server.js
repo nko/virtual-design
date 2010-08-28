@@ -80,7 +80,12 @@ var board=[],
 //blocks shapes
     blocks.push([[1, 1, 1, 1], [0,0,0,0], [0,0,0,0], [0,0,0,0]]); // I-block
     blocks.push([[1, 1, 1], [0, 1, 0], [0,0,0] ]); // T-block
- 
+    blocks.push([[1, 1],[1, 1]]); //O-block
+    blocks.push([[1, 1, 1],[1, 0, 0], [0,0,0]]); //L-block
+    blocks.push([[1, 1, 1],[0, 0, 1], [0,0,0]]); //J-block
+    blocks.push([[0, 1, 1],[1, 1, 0], [0,0,0]]); //S-block
+    blocks.push([[1, 1, 0],[0, 1, 1], [0,0,0]]); //Z-block
+    
 //clearing the board
 for( var y = 0; y < yBoard; y++ ) {
     
@@ -98,11 +103,11 @@ io.on('connection', function(client){
 	client.on('message', function(message){
         var comm=''
         if (message==38 || message==119) {
-            board[4][5] = 'style1';
+            //board[4][5] = 'style1';
         } else if (message==37 || message==97) {
             comm='LEFT';
         } else if (message==39 || message==100) {
-            board[10][10] = 'style1';
+            //board[10][10] = 'style1';
         } else if (message==40 || message==115) {
             comm='DOWN';
         }
