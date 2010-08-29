@@ -1,11 +1,16 @@
 table, td {
-                border: 1px solid black;
+                /*border: 1px solid black;*/
                 border-collapse: collapse;
                 visibility:visible;
+                background-color:#222;
+                margin:0px;
+                padding:0px;
             }
 
 .style1 {
-    background-color: #f00;
+    background-image: url('shapes/vd.png');
+    width:20px;
+    height:20px;
 }
 
 .style2 {

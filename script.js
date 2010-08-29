@@ -35,6 +35,7 @@ for( var y = 0; y < yFields; y++ ) { //'draw' rows
         field.height = fieldSize;
         field.id = x+"_"+y;
         fields[y][x] = field;
+        //field.innerHTML="<img src='/shapes/fill.gif'/>";
         row.appendChild(field);
     }
 }

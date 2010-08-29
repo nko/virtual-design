@@ -24,14 +24,14 @@ server = http.createServer(function(req, res){
 			break;
 			
 		default:
-			if (/\.(js|html|swf|css)$/.test(path)){
+			if (/\.(js|html|swf|css|jpg|gif|png)$/.test(path)){
 				try {
                     var contentType='',
-                        encoding='';
+                        encoding='binary';
                     switch (path.substr(path.lastIndexOf('.')-path.length)) {
                         case '.swf': //here comes da FlashFileeeeee
                             contentType = 'application/x-shockwave-flash'; 
-                            encoding='binary';
+                            
                         break;
                         case '.js':
                             contentType = 'text/javascript';
@@ -45,6 +45,15 @@ server = http.createServer(function(req, res){
                             contentType = 'text/css';
                             encoding='utf8';
                         break;
+                        case '.jpg':
+                            contentType = "image/jpeg";
+                        break;
+                        case '.gif':
+                            contentType = "image/gif";
+                        break;
+                        case '.png':
+                            contentType = "image/png";
+                        break;                        
                     }
 
 					res.writeHead(200, {'Content-Type': contentType});
