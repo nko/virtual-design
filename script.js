@@ -49,15 +49,29 @@ var redrawBoard = function(board) {
         }
     }
 }
+
+
+var addUsers = function(users, avatars) {
+    var text = 'Online players: ';
+    //console.log(users, avatars);
+    for (var user in users) {
+        text += '<img style="margin-right:5px;" src="/shapes/'+avatars[user].slice(5)+'.png" />'+users[user]+' ';
+    }
+    document.getElementById('users').innerHTML = text;
+}
 ///////////////////////////
 // creating socket stuff based on socket.io & socket.io-node
 io.setPath('/socketIO/');
 
-var socket = new io.Socket(null, {port: 8080});
+var socket = new io.Socket(null, {port: 80});
       socket.connect();
       socket.on('message', function(obj){
 
         redrawBoard(obj.board);
+        if (obj.users ) {
+            //console.log(obj);
+            addUsers(obj.users, obj.avatars);
+        }
         pointsDiv.innerHTML = obj.points;
       });      
 

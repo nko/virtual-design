@@ -72,7 +72,7 @@ server = http.createServer(function(req, res){
 	}
 });
 
-server.listen(8080);
+server.listen(80);
 		
 // socket.io, I choose you
 // simplest chat application evar
@@ -149,6 +149,10 @@ var showBlock = function(blockNumber, clientSessionId) {
 var checkLine = function() {
      
     for( var y = 0; y < yBoard; y++ ) {
+        if (board[0].indexOf('')==-1) {
+            clearBoard();
+            points = 0;
+        }
         var isLine = 0;
         for( var x = 0; x < xBoard; x++ ) { 
             if (board[y][x]!=''){
@@ -400,14 +404,14 @@ io.on('connection', function(client){
             //first connection
             activeBlock[client.sessionId] = [];
             tempCoords[client.sessionId] = [];
-            users[client.sessionId] = message.login || client.sessionId;
+            users[client.sessionId] = message.login || client.sessionId.slice(-10);
             schema[client.sessionId] = [];
             blockClass[client.sessionId] = 'style'+message.avatar;
             showBlock(~~(Math.random()*blocks.length), client.sessionId);
             
             (function(){
             //Main game loop
-                var message = { board: board, points: points };
+                var message = { board: board, points: points, users:users, avatars:blockClass };
                 lowerBlock(client.sessionId);
                 client.send(message);
                 client.broadcast(message);
@@ -443,6 +447,8 @@ io.on('connection', function(client){
         delete schema[client.sessionId];
         delete users[client.sessionId];
         delete blockClass[client.sessionId];
+        var message = { board: board, points: points, users:users, avatars:blockClass };
+        client.broadcast(message);       
         //clearBoard();
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
