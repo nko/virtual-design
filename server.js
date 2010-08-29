@@ -168,7 +168,7 @@ var checkLine = function() {
             for( x = 0; x < xBoard; x++ ) { 
                 board[y][x]='';
             }
-            for(vy = y; y >= 0; y-- ) {
+            for(vy = y; y >= 0; y--) {
                 
                 for(x = 0; x < xBoard; x++ ) { 
                     
