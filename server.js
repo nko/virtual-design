@@ -402,7 +402,7 @@ io.on('connection', function(client){
     
     (function(){
     //Main game loop
-        lowerBlock(user);
+        lowerBlock(client.sessionId);
         client.send(message);
         client.broadcast(message);
            
