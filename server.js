@@ -86,7 +86,7 @@ var Equals=function(b,c){if(!b||!c)return false;if(b.length==c.length){for(var a
 
 var speed=500,
     schema = {},
-    
+    users={},
     blockClass = {},
     tempCoords={},
     points=0,
@@ -385,28 +385,10 @@ var rotateBlock= function(clientSessionId) {
     }
 };
 
-var ile=1;
+
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board, points: points };
-    
-    activeBlock[client.sessionId] = [];
-    tempCoords[client.sessionId] = [];
-    schema[client.sessionId] = [];
-    blockClass[client.sessionId] = 'style'+ile;
-    ile++;
-    if (ile==5) ile=1;
-    showBlock(~~(Math.random()*blocks.length), client.sessionId);
-    
-    (function(){
-    //Main game loop
-    lowerBlock(client.sessionId);
-    client.send(message);
-    client.broadcast(message);
-       
-
-    timeouts[client.sessionId] = setTimeout(arguments.callee, 800);
-    })();
     
     //delete that:
     client.send(message);
@@ -414,14 +396,33 @@ io.on('connection', function(client){
             
 	client.on('message', function(message){
         var comm=''
-        if (message==38 || message==119) {//up
-            rotateBlock(client.sessionId);
-        } else if (message==37 || message==97) { //left
-            moveBlock("l", client.sessionId);
-        } else if (message==39 || message==100) { //right
-            moveBlock("r", client.sessionId);
-        } else if (message==40 || message==115) { //down
-            lowerBlock(client.sessionId);
+        if (message.avatar) {
+            //first connection
+            activeBlock[client.sessionId] = [];
+            tempCoords[client.sessionId] = [];
+            users[client.sessionId] = message.login || client.sessionId;
+            schema[client.sessionId] = [];
+            blockClass[client.sessionId] = 'style'+message.avatar;
+            showBlock(~~(Math.random()*blocks.length), client.sessionId);
+            
+            (function(){
+            //Main game loop
+                var message = { board: board, points: points };
+                lowerBlock(client.sessionId);
+                client.send(message);
+                client.broadcast(message);
+                timeouts[client.sessionId] = setTimeout(arguments.callee, 800);
+            })();
+        } else {
+            if (message==38 || message==119) {//up
+                rotateBlock(client.sessionId);
+            } else if (message==37 || message==97) { //left
+                moveBlock("l", client.sessionId);
+            } else if (message==39 || message==100) { //right
+                moveBlock("r", client.sessionId);
+            } else if (message==40 || message==115) { //down
+                lowerBlock(client.sessionId);
+            }
         }
         
 		var message = { board: board, points: points};
@@ -440,6 +441,8 @@ io.on('connection', function(client){
         delete activeBlock[client.sessionId];
         delete tempCoords[client.sessionId];
         delete schema[client.sessionId];
+        delete users[client.sessionId];
+        delete blockClass[client.sessionId];
         //clearBoard();
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});

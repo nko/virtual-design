@@ -16,6 +16,7 @@ var xFields = 40, //width
     yFields = 20, //height
     fieldSize = 20,
     fields =[],
+    start=false,
     pointsDiv = document.getElementById('points'),
     container = document.getElementById('container'),
     //construction Vars
@@ -64,8 +65,18 @@ var socket = new io.Socket(null, {port: 8080});
 //keys
 
 document.onkeypress = function (e){
+    if (start) {
         var evtobj=window.event? event : e,
             unicode=evtobj.charCode? evtobj.charCode : evtobj.keyCode;
-    socket.send(unicode);
+        socket.send(unicode);
+    }
+}
+
+var LoginIn = function() {
+    var message = {avatar:choosenOne, login:document.getElementById('name').value}
+    socket.send(message);
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+    start=true;
 }
         

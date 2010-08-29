@@ -18,7 +18,10 @@ a {
 #mainBody{
 	width:800px; margin:24px auto 0 auto; 
 	}
-
+    
+#mainBody input{
+	width:158px; height:18px; background-color:#171717; border:#494949 1px solid; color:#ACACAC; margin: 10px 0;
+	}
 #footerMain{
 	background:url(images/footer_bg.gif) repeat-x 0 0; width:100%;
 	}	
