@@ -8,18 +8,16 @@ table, td {
             }
 
 .style1 {
-    background-image: url('shapes/vd.png');
-    width:20px;
-    height:20px;
+    background-image: url('shapes/1.png');
 }
 
 .style2 {
-    background-color: #666;
+    background-image: url('shapes/2.png');
 }
 
 .style3 {
-    background-color: #f0f;
+    background-image: url('shapes/3.png');
 }
 .style4 {
-    background-color: #00f;
+    background-image: url('shapes/4.png');
 }
