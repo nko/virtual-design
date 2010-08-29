@@ -16,12 +16,11 @@ server = http.createServer(function(req, res){
 	switch (path){
 		case '/':
 				res.writeHead(200, {'Content-Type': 'text/html'});
-				res.write('developing');
-                /*fs.readFile(__dirname + '/index.html', 'utf8', function(err, data){
+				fs.readFile(__dirname + '/index.html', 'utf8', function(err, data){
 				if (!err) res.write(data, 'utf8');
 						res.end();
 				});
-*/
+
 			break;
 			
 		default:
@@ -74,12 +73,16 @@ var io = io.listen(server);
 /////////////////////////
 // GAME LOGIC
 
-function areArraysEqual(c,d){var b=[];if(!c[0]||!d[0])return false;if(c.length!=d.length)return false;for(var a=0;a<c.length;a++){key=typeof c[a]+"~"+c[a];if(b[key])b[key]++;else b[key]=1}for(a=0;a<d.length;a++){key=typeof d[a]+"~"+d[a];if(b[key])if(b[key]==0)return false;else b[key]--;else return false}return true};
+var Equals=function(b,c){if(!b||!c)return false;if(b.length==c.length){for(var a=0;a<b.length;a++)if(typeof b[a]=="object"){if(!Equals(b[a],c[a]))return false}else if(b[a]!=c[a])return false;return true}else return false};
 
 var speed=500,
-    schema = [],
+    schema = {},
+    
     blockClass = 'style1',
-    activeBlock = [],
+    tempCoords={},
+    points=0,
+    //loggedUsers = {},
+    activeBlock = {},
     board=[],
     xBoard = 40, //width
     yBoard = 20, //height
@@ -106,7 +109,7 @@ var clearBoard = function() {
 }
 clearBoard();
 
-var showBlock = function(blockNumber) {
+var showBlock = function(blockNumber, clientSessionId) {
 //funkcja pokazujaca klocek o danym numerze
     var block = blocks[blockNumber],
         wspX = board[0].indexOf(''), 
@@ -121,76 +124,258 @@ var showBlock = function(blockNumber) {
         for ( i = 0; i < block.length; i++ ) {
             for ( z=0; z<block[i].length; z++) {
                 if (block[i][z] == 1) {
-                    board[wspY+i][wspX+z] = blockClass;
-                    activeBlock.push([wspY+i, wspX+z]);
+                    var newY = wspY+i, newX = wspX+z;
+                    board[newY][newX] = blockClass;
+                    activeBlock[clientSessionId].push([newY, newX]);
+                    tempCoords[clientSessionId].push(newY+"_"+newX);
+                }
+                
+            }
+        }
+        schema[clientSessionId] = block;
+    }
+};
+
+var checkLine = function() {
+     
+    for( var y = 0; y < yBoard; y++ ) {
+        var isLine = 0;
+        for( var x = 0; x < xBoard; x++ ) { 
+            if (board[y][x]!=''){
+                isLine=1;
+            } else {
+                isLine=0;
+                break;
+            }
+        }
+        if (isLine) {
+            points+=10;
+            //ZwiekszLinie(); //TU MODYFIKANDO
+            for( x = 0; x < xBoard; x++ ) { 
+                board[y][x]='';
+            }
+            for(vy = y; y >= 0; y-- ) {
+                
+                for(x = 0; x < xBoard; x++ ) { 
+                    
+                    if (board[y][x]!=''){
+                        
+                        board[y+1][x] = board[y][x];
+                        board[y][x]='';
+                    }
+                }
+            }
+            //SprawdzLinie();
+        }
+    }
+};
+
+var lowerBlock = function(clientSessionId) {
+    var i=activeBlock[clientSessionId].length,
+        insideActive = false,
+        movePossible = true;  //is it possible to move down?  
+    while (i--) {
+        var targetCoordsY = activeBlock[clientSessionId][i][0]+1,
+            targetCoordsX = activeBlock[clientSessionId][i][1];     
+        if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]==='')) {    
+        } else {
+            if (tempCoords[clientSessionId].indexOf(targetCoordsY+"_"+targetCoordsX) != -1) {
+            } else {
+                movePossible = false;
+                activeBlock[clientSessionId]=[];
+                tempCoords[clientSessionId]=[];
+                checkLine();
+                showBlock(~~(Math.random()*blocks.length), clientSessionId);
+                points++;
+                
+                //add points and check the line
+                break;
+            }  
+        }
+        
+    }   
+    if (movePossible) {
+        tempCoords[clientSessionId] = [];
+        i=activeBlock[clientSessionId].length;
+        while (i--) {
+            var targetCoordsY = activeBlock[clientSessionId][i][0]+1,
+                targetCoordsX = activeBlock[clientSessionId][i][1]; 
+
+                board[targetCoordsY][targetCoordsX] = board[activeBlock[clientSessionId][i][0]][targetCoordsX];
+                board[activeBlock[clientSessionId][i][0]][targetCoordsX]='';
+                activeBlock[clientSessionId][i] = [targetCoordsY, targetCoordsX];
+                tempCoords[clientSessionId].push(targetCoordsY+"_"+targetCoordsX);      
+        }
+    }
+};
+
+
+var moveBlock = function(side, clientSessionId) {
+    var size = activeBlock[clientSessionId].length,
+        i=size;
+    if (side=="l") {
+        var possible=true, newX;
+        for (var i=0; i<size; i++) {
+            newX=activeBlock[clientSessionId][i][1]-1;
+            if (newX < 0) {
+                possible=false;
+                break;
+            }
+            if (board[activeBlock[clientSessionId][i][0]][newX]!="" && (tempCoords[clientSessionId].indexOf(activeBlock[clientSessionId][i][0]+"_"+newX)==-1)) {
+                possible=false;
+                break;            
+            }
+        }
+        if (possible) {
+            while (i--) {
+                //cleaning old block
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = '';
+            }
+            for (var i=0; i<size; i++) {
+                newX=activeBlock[clientSessionId][i][1]-1;
+                activeBlock[clientSessionId][i]=[activeBlock[clientSessionId][i][0], newX];
+                tempCoords[clientSessionId][i] = activeBlock[clientSessionId][i][0]+"_"+newX;
+                
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass;
+            }
+        }
+    }
+    if (side=="r") {
+        var possible=true, newX;
+        for (var i=0; i<size; i++) {
+            newX=activeBlock[clientSessionId][i][1]+1;
+            if (newX > xBoard-1) {
+                possible=false;
+                break;
+            }
+            if (board[activeBlock[clientSessionId][i][0]][newX]!="" && (tempCoords[clientSessionId].indexOf(activeBlock[clientSessionId][i][0]+"_"+newX)==-1)) {
+                possible=false;
+                break;            
+            }
+        }
+        if (possible) {
+            while (i--) {
+                //cleaning old block
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = '';
+            }
+    
+            for (var i=0; i<size; i++) {
+                newX=activeBlock[clientSessionId][i][1]+1;
+                activeBlock[clientSessionId][i]=[activeBlock[clientSessionId][i][0], newX];
+                tempCoords[clientSessionId][i] = activeBlock[clientSessionId][i][0]+"_"+newX;
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass;
+            }
+        }
+    }
+}
+
+
+var rotateBlock= function(clientSessionId) {  
+      
+    var temp=[],  
+        size = schema[clientSessionId].length;
+    
+    //inicjujemy j¹ zerami
+    for (var i=0; i<size; i++) {
+        temp[i]=[];
+        for (var j=0; j<size; j++) {
+            temp[i][j]=0;
+        }
+    } 
+
+    for(i=0; i<size; i++) {
+        
+        for(var j=0; j<size; j++){
+            //odwracamy
+            temp[(size-1)-j][i]=schema[clientSessionId][i][j]; 
+        }
+    }
+    
+    var full = 0;
+    for(i=0; i<size; i++) {
+        if (temp[0][i]==1) {
+            full=1;
+            //break;
+        }
+    }
+    if (!full) {
+        temp.push(temp.shift());
+    }
+
+    full=0;
+
+    for(i=0; i<size; i++) {
+        if (temp[i][0]==1) {
+            full=1;
+            //break;
+        }
+    }
+    if (!full) {
+        for(i=0; i<size; i++) {
+            temp[i].push(temp[i].shift());
+        }
+        
+    }
+        
+    var possible = true;
+    
+    for ( var i = 0, j=temp.length; i < j; i++ ) {
+        for (var z=0, v =temp[i].length; z<v; z++) {
+            if (temp[i][z] == 1) {
+            var x = (activeBlock[clientSessionId][0][1])+z, y=(activeBlock[clientSessionId][0][0])+i;
+                if ((x > xBoard-1) || (y > yBoard-1) || ((board[y][x]!="") && (tempCoords[clientSessionId].indexOf(y+"_"+x)==-1))){
+                    
+                    possible=false;
+                    break;
+                
+                }
+            }
+        }
+    }
+    
+    if(possible) {
+        //wyrownywanie klocka po obrocie do punktu 0-0 w schematKlocka
+
+        
+        //czyscimy stary klocek
+        i=activeBlock[clientSessionId].length;
+        while (i--) {
+            board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = '';
+        }
+        
+        //rysujemy nowy
+        var newY = activeBlock[clientSessionId][0][0], newX = activeBlock[clientSessionId][0][1];
+        activeBlock[clientSessionId] = [];
+        tempCoords[clientSessionId]=[];
+        for ( var i = 0, j=temp.length; i < j; i++ ) {
+            for (var z=0, v =temp[i].length; z<v; z++) {
+                if (temp[i][z] == 1) {
+                    var newerX = newX+z, newerY=newY+i;
+                    
+                    board[newerY][newerX] = blockClass;
+                    activeBlock[clientSessionId].push([newerY, newerX]);
+                    tempCoords[clientSessionId].push(newerY+"_"+newerX); 
                     
                 }
                 
             }
         }
-        schema = block;
-    }
-};
-
-var lowerBlock = function() {
-
-    var i=activeBlock.length,
-        insideActive = false,
-        movePossible = true;  //is it possible to move down?
-    
-    while (i--) {
-
-        var targetCoordsY = activeBlock[i][0]+1,
-            targetCoordsX = activeBlock[i][1]; //pole docelowe
-        if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]=='')) {
-            
-        } else {
-            for (var w=0, aB=activeBlock.length;w<aB;w++) {             
-                if (areArraysEqual(activeBlock[w], [targetCoordsY,targetCoordsX])) {
-                    insideActive = true;
-                } 
-            }
-            if (!insideActive) {
-                movePossible = false;
-                activeBlock=[];
-                break;
-            }  
-        }
-        
-    }
-    
-    if (movePossible) {
-        i=activeBlock.length;
-        while (i--) {
-            var targetCoordsY = activeBlock[i][0]+1,
-                targetCoordsX = activeBlock[i][1]; 
-            
-           if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]=='')) {
-                //console.log(docWsp);
-                board[targetCoordsY][targetCoordsX] = board[activeBlock[i][0]][targetCoordsX];
-                board[activeBlock[i][0]][targetCoordsX]='';
-                activeBlock[i] = [targetCoordsY, targetCoordsX];
-            } else {
-                activeBlock = [];
-                break;
-            }
-            
-        }
+        schema[clientSessionId] = temp;
     } else {
-        showBlock(1);
-        //console.log('show next');
-        //DodajPunkty(1);
-        //SprawdzLinie();
-        //PokazKlocek(nastepnyKlocek);
+        console.log('niemozna');
     }
 };
-
 
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
-    var message = { board: board };
-    //showBlock(~~(Math.random()*blocks.length));
-    showBlock(1);
+    var message = { board: board, points: points };
+    
+    activeBlock[client.sessionId] = [];
+    tempCoords[client.sessionId] = [];
+    schema[client.sessionId] = [];
+    
+    showBlock(~~(Math.random()*blocks.length), client.sessionId);
+    
     //delete that:
     client.send(message);
     client.broadcast(message);
@@ -198,17 +383,16 @@ io.on('connection', function(client){
 	client.on('message', function(message){
         var comm=''
         if (message==38 || message==119) {//up
-            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            rotateBlock(client.sessionId);
         } else if (message==37 || message==97) { //left
-            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            moveBlock("l", client.sessionId);
         } else if (message==39 || message==100) { //right
-            board[~~(Math.random()*yBoard)][0] = 'style2';
+            moveBlock("r", client.sessionId);
         } else if (message==40 || message==115) { //down
-            lowerBlock();
-            //board[~~(Math.random()*yBoard)][~~(Math.random()*xBoard)] = 'style2';
+            lowerBlock(client.sessionId);
         }
         
-		var message = { board: board };
+		var message = { board: board, points: points};
 		
             client.send(message);
             client.broadcast(message);
@@ -216,15 +400,21 @@ io.on('connection', function(client){
 		
 	});
     
-    /*(function(){
+    (function(){
     //Main game loop
         
         client.send(message);
         client.broadcast(message);
-        setTimeout(arguments.callee, 1000);
-    })();*/
+        for (user in activeBlock) {
+            lowerBlock(user);
+        }
+        setTimeout(arguments.callee, 800);
+    })();
 	client.on('disconnect', function(){
-        clearBoard();
+        delete activeBlock[client.sessionId];
+        delete tempCoords[client.sessionId];
+        delete schema[client.sessionId];
+        //clearBoard();
 		//client.broadcast({ announcement: client.sessionId + ' disconnected' });
 	});
 });

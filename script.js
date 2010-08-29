@@ -16,6 +16,7 @@ var xFields = 40, //width
     yFields = 20, //height
     fieldSize = 20,
     fields =[],
+    pointsDiv = document.getElementById('points'),
     container = document.getElementById('container'),
     //construction Vars
     table = document.createElement('table'),
@@ -55,6 +56,7 @@ var socket = new io.Socket(null, {port: 80});
       socket.on('message', function(obj){
 
         redrawBoard(obj.board);
+        pointsDiv.innerHTML = obj.points;
       });      
 
 
