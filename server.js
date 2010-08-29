@@ -145,7 +145,7 @@ var showBlock = function(blockNumber, clientSessionId) {
         schema[clientSessionId] = block;
     }
 };
-
+ 
 var checkLine = function() {
      
     for( var y = 0; y < yBoard; y++ ) {
