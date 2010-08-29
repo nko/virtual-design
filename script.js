@@ -51,7 +51,7 @@ var redrawBoard = function(board) {
 // creating socket stuff based on socket.io & socket.io-node
 io.setPath('/socketIO/');
 
-var socket = new io.Socket(null, {port: 80});
+var socket = new io.Socket(null, {port: 8080});
       socket.connect();
       socket.on('message', function(obj){
 
