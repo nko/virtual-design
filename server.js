@@ -402,12 +402,11 @@ io.on('connection', function(client){
     
     (function(){
     //Main game loop
-        
+        lowerBlock(user);
         client.send(message);
         client.broadcast(message);
-        for (user in activeBlock) {
-            lowerBlock(user);
-        }
+           
+
         setTimeout(arguments.callee, 800);
     })();
 	client.on('disconnect', function(){
