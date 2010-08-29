@@ -78,11 +78,12 @@ var Equals=function(b,c){if(!b||!c)return false;if(b.length==c.length){for(var a
 var speed=500,
     schema = {},
     
-    blockClass = 'style1',
+    blockClass = {},
     tempCoords={},
     points=0,
     //loggedUsers = {},
     activeBlock = {},
+    timeouts={},
     board=[],
     xBoard = 40, //width
     yBoard = 20, //height
@@ -125,7 +126,7 @@ var showBlock = function(blockNumber, clientSessionId) {
             for ( z=0; z<block[i].length; z++) {
                 if (block[i][z] == 1) {
                     var newY = wspY+i, newX = wspX+z;
-                    board[newY][newX] = blockClass;
+                    board[newY][newX] = blockClass[clientSessionId];
                     activeBlock[clientSessionId].push([newY, newX]);
                     tempCoords[clientSessionId].push(newY+"_"+newX);
                 }
@@ -171,15 +172,25 @@ var checkLine = function() {
 };
 
 var lowerBlock = function(clientSessionId) {
+    
+    if (!activeBlock[clientSessionId]) 
+        showBlock(~~(Math.random()*blocks.length), clientSessionId);
+        
     var i=activeBlock[clientSessionId].length,
-        insideActive = false,
+        insideActive,
         movePossible = true;  //is it possible to move down?  
     while (i--) {
         var targetCoordsY = activeBlock[clientSessionId][i][0]+1,
             targetCoordsX = activeBlock[clientSessionId][i][1];     
         if ((targetCoordsY<yBoard) && (board[targetCoordsY][targetCoordsX]==='')) {    
         } else {
-            if (tempCoords[clientSessionId].indexOf(targetCoordsY+"_"+targetCoordsX) != -1) {
+            insideActive=false;
+            for (user in tempCoords) {
+                if (tempCoords[user].indexOf(targetCoordsY+"_"+targetCoordsX) != -1) {
+                    insideActive=true;
+                }
+            }
+            if (insideActive) {
             } else {
                 movePossible = false;
                 activeBlock[clientSessionId]=[];
@@ -201,7 +212,8 @@ var lowerBlock = function(clientSessionId) {
             var targetCoordsY = activeBlock[clientSessionId][i][0]+1,
                 targetCoordsX = activeBlock[clientSessionId][i][1]; 
 
-                board[targetCoordsY][targetCoordsX] = board[activeBlock[clientSessionId][i][0]][targetCoordsX];
+                //board[targetCoordsY][targetCoordsX] = board[activeBlock[clientSessionId][i][0]][targetCoordsX];
+                board[targetCoordsY][targetCoordsX] = blockClass[clientSessionId];
                 board[activeBlock[clientSessionId][i][0]][targetCoordsX]='';
                 activeBlock[clientSessionId][i] = [targetCoordsY, targetCoordsX];
                 tempCoords[clientSessionId].push(targetCoordsY+"_"+targetCoordsX);      
@@ -236,7 +248,7 @@ var moveBlock = function(side, clientSessionId) {
                 activeBlock[clientSessionId][i]=[activeBlock[clientSessionId][i][0], newX];
                 tempCoords[clientSessionId][i] = activeBlock[clientSessionId][i][0]+"_"+newX;
                 
-                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass;
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass[clientSessionId];
             }
         }
     }
@@ -263,7 +275,7 @@ var moveBlock = function(side, clientSessionId) {
                 newX=activeBlock[clientSessionId][i][1]+1;
                 activeBlock[clientSessionId][i]=[activeBlock[clientSessionId][i][0], newX];
                 tempCoords[clientSessionId][i] = activeBlock[clientSessionId][i][0]+"_"+newX;
-                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass;
+                board[activeBlock[clientSessionId][i][0]][activeBlock[clientSessionId][i][1]] = blockClass[clientSessionId];
             }
         }
     }
@@ -352,7 +364,7 @@ var rotateBlock= function(clientSessionId) {
                 if (temp[i][z] == 1) {
                     var newerX = newX+z, newerY=newY+i;
                     
-                    board[newerY][newerX] = blockClass;
+                    board[newerY][newerX] = blockClass[clientSessionId];
                     activeBlock[clientSessionId].push([newerY, newerX]);
                     tempCoords[clientSessionId].push(newerY+"_"+newerX); 
                     
@@ -361,11 +373,10 @@ var rotateBlock= function(clientSessionId) {
             }
         }
         schema[clientSessionId] = temp;
-    } else {
-        console.log('niemozna');
     }
 };
 
+var ile=1;
 io.on('connection', function(client){
 	//client.broadcast({ announcement: client.sessionId + ' connected' });
     var message = { board: board, points: points };
@@ -373,8 +384,20 @@ io.on('connection', function(client){
     activeBlock[client.sessionId] = [];
     tempCoords[client.sessionId] = [];
     schema[client.sessionId] = [];
-    
+    blockClass[client.sessionId] = 'style'+ile;
+    ile++;
+    if (ile==5) ile=1;
     showBlock(~~(Math.random()*blocks.length), client.sessionId);
+    
+    (function(){
+    //Main game loop
+    lowerBlock(client.sessionId);
+    client.send(message);
+    client.broadcast(message);
+       
+
+    timeouts[client.sessionId] = setTimeout(arguments.callee, 800);
+    })();
     
     //delete that:
     client.send(message);
@@ -400,16 +423,11 @@ io.on('connection', function(client){
 		
 	});
     
-    (function(){
-    //Main game loop
-        lowerBlock(client.sessionId);
-        client.send(message);
-        client.broadcast(message);
-           
-
-        setTimeout(arguments.callee, 800);
-    })();
 	client.on('disconnect', function(){
+        clearTimeout(timeouts[client.sessionId]);
+        for (var i=0, aB=activeBlock[client.sessionId].length;i<aB;i++) {
+            board[activeBlock[client.sessionId][i][0]][activeBlock[client.sessionId][i][1]]='';
+        }
         delete activeBlock[client.sessionId];
         delete tempCoords[client.sessionId];
         delete schema[client.sessionId];
